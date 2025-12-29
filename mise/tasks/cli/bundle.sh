@@ -12,6 +12,7 @@ NC='\033[0m'
 print_status() {
     echo -e "${GREEN}▶ $1${NC}"
 }
+SKIP_SIGNING="${TUIST_EWA_SKIP_SIGNING:-0}"
 XCODE_WORKSPACE_PATH=$MISE_PROJECT_ROOT/Tuist.xcworkspace
 source $MISE_PROJECT_ROOT/mise/utilities/setup.sh
 XCODE_PATH_SCRIPT_PATH=$SCRIPT_DIR/../../../utilities/xcode_path.sh
@@ -30,16 +31,18 @@ KEYCHAIN_PATH=$TMP_DIR/keychain.keychain
 KEYCHAIN_PASSWORD=$(uuidgen)
 
 # Codesign
-print_status "Setting up Keychain for signing..."
-if [ "${CI:-}" = "true" ]; then
-    print_status "Creating a new temporary keychain..."
-    security create-keychain -p $KEYCHAIN_PASSWORD $KEYCHAIN_PATH
-    security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
-    security default-keychain -s $KEYCHAIN_PATH
-    security unlock-keychain -p $KEYCHAIN_PASSWORD $KEYCHAIN_PATH
-fi
+if [ "$SKIP_SIGNING" = "0" ]; then
+    print_status "Setting up Keychain for signing..."
+    if [ "${CI:-}" = "true" ]; then
+        print_status "Creating a new temporary keychain..."
+        security create-keychain -p $KEYCHAIN_PASSWORD $KEYCHAIN_PATH
+        security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+        security default-keychain -s $KEYCHAIN_PATH
+        security unlock-keychain -p $KEYCHAIN_PASSWORD $KEYCHAIN_PATH
+    fi
 
-echo $BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE | base64 --decode > $TMP_DIR/certificate.p12 && security import $TMP_DIR/certificate.p12 -P $CERTIFICATE_PASSWORD -A
+    echo $BASE_64_DEVELOPER_ID_APPLICATION_CERTIFICATE | base64 --decode > $TMP_DIR/certificate.p12 && security import $TMP_DIR/certificate.p12 -P $CERTIFICATE_PASSWORD -A
+fi
 
 echo "$(format_section "Building release into $BUILD_DIRECTORY")"
 
@@ -101,53 +104,55 @@ echo "$(format_section "Bundling")"
 (
     cd $BUILD_DIRECTORY || exit 1
 
-    echo "$(format_subsection "Signing")"
-    /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose tuist
-    /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose ProjectDescription.framework
+    if [ "$SKIP_SIGNING" = "0" ]; then
+        echo "$(format_subsection "Signing")"
+        /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose tuist
+        /usr/bin/codesign --sign "$CERTIFICATE_NAME" --timestamp --options runtime --verbose ProjectDescription.framework
 
-    echo "$(format_subsection "Notarizing")"
-    zip -q -r --symlinks "notarization-bundle.zip" tuist ProjectDescription.framework
+        echo "$(format_subsection "Notarizing")"
+        zip -q -r --symlinks "notarization-bundle.zip" tuist ProjectDescription.framework
 
-    RAW_JSON=$(xcrun notarytool submit "notarization-bundle.zip" \
-        --apple-id "$APPLE_ID" \
-        --team-id "$TEAM_ID" \
-        --password "$APP_SPECIFIC_PASSWORD" \
-        --output-format json)
-    echo "$RAW_JSON"
-    SUBMISSION_ID=$(echo "$RAW_JSON" | jq -r '.id')
-    echo "Submission ID: $SUBMISSION_ID"
-
-    while true; do
-        STATUS=$(xcrun notarytool info "$SUBMISSION_ID" \
+        RAW_JSON=$(xcrun notarytool submit "notarization-bundle.zip" \
             --apple-id "$APPLE_ID" \
             --team-id "$TEAM_ID" \
             --password "$APP_SPECIFIC_PASSWORD" \
-            --output-format json | jq -r '.status')
+            --output-format json)
+        echo "$RAW_JSON"
+        SUBMISSION_ID=$(echo "$RAW_JSON" | jq -r '.id')
+        echo "Submission ID: $SUBMISSION_ID"
 
-        case $STATUS in
-            "Accepted")
-                echo -e "${GREEN}Notarization succeeded!${NC}"
-                break
-                ;;
-            "In Progress")
-                echo "Notarization in progress... waiting 30 seconds"
-                sleep 30
-                ;;
-            "Invalid"|"Rejected")
-                echo "Notarization failed with status: $STATUS"
-                xcrun notarytool log "$SUBMISSION_ID" \
-                    --apple-id "$APPLE_ID" \
-                    --team-id "$TEAM_ID" \
-                    --password "$APP_SPECIFIC_PASSWORD"
-                exit 1
-                ;;
-            *)
-                echo "Unknown status: $STATUS"
-                exit 1
-                ;;
-        esac
-    done
-    rm "notarization-bundle.zip"
+        while true; do
+            STATUS=$(xcrun notarytool info "$SUBMISSION_ID" \
+                --apple-id "$APPLE_ID" \
+                --team-id "$TEAM_ID" \
+                --password "$APP_SPECIFIC_PASSWORD" \
+                --output-format json | jq -r '.status')
+
+            case $STATUS in
+                "Accepted")
+                    echo -e "${GREEN}Notarization succeeded!${NC}"
+                    break
+                    ;;
+                "In Progress")
+                    echo "Notarization in progress... waiting 30 seconds"
+                    sleep 30
+                    ;;
+                "Invalid"|"Rejected")
+                    echo "Notarization failed with status: $STATUS"
+                    xcrun notarytool log "$SUBMISSION_ID" \
+                        --apple-id "$APPLE_ID" \
+                        --team-id "$TEAM_ID" \
+                        --password "$APP_SPECIFIC_PASSWORD"
+                    exit 1
+                    ;;
+                *)
+                    echo "Unknown status: $STATUS"
+                    exit 1
+                    ;;
+            esac
+        done
+        rm "notarization-bundle.zip"
+    fi
 
     echo "$(format_subsection "Bundling tuist.zip")"
     zip -q -r --symlinks tuist.zip tuist ProjectDescription.framework ProjectDescription.framework.dSYM Templates vendor
