@@ -55,7 +55,7 @@ public final class TemplatesDirectoryLocator: TemplatesDirectoryLocating {
             let maybeBundlePath = try? AbsolutePath(validating: Bundle(for: TemplatesDirectoryLocator.self).bundleURL.path)
         #endif
         guard let bundlePath = maybeBundlePath else { return nil }
-        let paths = [
+        var paths = [
             bundlePath,
             bundlePath.parentDirectory,
             // == Homebrew directory structure ==
@@ -67,6 +67,11 @@ public final class TemplatesDirectoryLocator: TemplatesDirectoryLocating {
             bundlePath.parentDirectory.appending(try! RelativePath(validating: "share")),
             // swiftlint:disable:previous force_try
         ]
+        if let templatesPath = Environment.current.variables["TUIST_TEMPLATES_PATH"] {
+            if let absoluteTemplatesPath = try? AbsolutePath(validating: templatesPath) {
+                paths.append(absoluteTemplatesPath)
+            }
+        }
         let candidates = paths.map { path in
             path.appending(component: Constants.templatesDirectoryName)
         }

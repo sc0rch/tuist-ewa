@@ -80,7 +80,7 @@ build_cli() {
         CODE_SIGNING_ALLOWED=NO \
         CODE_SIGNING_REQUIRED=NO
 
-    mv $BINARY_PATH $BUILD_DIRECTORY/tuist
+    mv $BINARY_PATH $BUILD_DIRECTORY/tuist-ewa
 }
 
 echo "$(format_section "Building")"
@@ -155,13 +155,13 @@ echo "$(format_section "Bundling")"
     fi
 
     echo "$(format_subsection "Bundling tuist.zip")"
-    zip -q -r --symlinks tuist.zip tuist ProjectDescription.framework ProjectDescription.framework.dSYM Templates vendor
+    zip -q -r --symlinks tuist.zip tuist-ewa ProjectDescription.framework ProjectDescription.framework.dSYM Templates vendor
 
     echo "$(format_subsection "Bundling ProjectDescription.xcframework.zip")"
     xcodebuild -create-xcframework -framework ProjectDescription.framework -output ProjectDescription.xcframework
     zip -q -r --symlinks ProjectDescription.xcframework.zip ProjectDescription.xcframework
 
-    rm -rf tuist ProjectDescription.framework ProjectDescription.xcframework ProjectDescription.framework.dSYM Templates vendor
+    rm -rf tuist-ewa ProjectDescription.framework ProjectDescription.xcframework ProjectDescription.framework.dSYM Templates vendor
 
     : > SHASUMS256.txt
     : > SHASUMS512.txt
