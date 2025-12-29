@@ -41,8 +41,13 @@ else
   exit 1
 fi
 
-echo "Building artifacts (unsigned)..."
-TUIST_EWA_SKIP_SIGNING=1 mise run cli:bundle
+SKIP_BUILD="${TUIST_EWA_SKIP_BUILD:-0}"
+if [[ "$SKIP_BUILD" = "1" ]]; then
+  echo "Skipping build (TUIST_EWA_SKIP_BUILD=1). Using existing ./build outputs."
+else
+  echo "Building artifacts (unsigned)..."
+  TUIST_EWA_SKIP_SIGNING=1 mise run cli:bundle
+fi
 
 if [[ ! -f build/tuist.zip || ! -f build/SHASUMS256.txt ]]; then
   echo "Error: build outputs not found in ./build"
