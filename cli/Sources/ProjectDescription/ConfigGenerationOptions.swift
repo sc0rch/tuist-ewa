@@ -25,6 +25,9 @@ extension Tuist {
         /// in their declarations.
         public var disablePackageVersionLocking: Bool
 
+        /// Skips running `xcodebuild -resolvePackageDependencies` during project generation.
+        public var skipPackageResolution: Bool
+
         /// This is now deprecated.
         ///
         /// To achieve the same behaviour, use `additionalPackageResolutionArguments` like so:
@@ -83,6 +86,7 @@ extension Tuist {
 
         public static func options(
             disablePackageVersionLocking: Bool = false,
+            skipPackageResolution: Bool = false,
             staticSideEffectsWarningTargets: StaticSideEffectsWarningTargets = .all,
             defaultConfiguration: String? = nil,
             optionalAuthentication: Bool = false,
@@ -96,6 +100,7 @@ extension Tuist {
             self.init(
                 resolveDependenciesWithSystemScm: false,
                 disablePackageVersionLocking: disablePackageVersionLocking,
+                skipPackageResolution: skipPackageResolution,
                 clonedSourcePackagesDirPath: nil,
                 additionalPackageResolutionArguments: additionalPackageResolutionArguments,
                 staticSideEffectsWarningTargets: staticSideEffectsWarningTargets,
@@ -118,6 +123,7 @@ extension Tuist {
         public static func options(
             resolveDependenciesWithSystemScm: Bool = false,
             disablePackageVersionLocking: Bool = false,
+            skipPackageResolution: Bool = false,
             clonedSourcePackagesDirPath: Path? = nil,
             staticSideEffectsWarningTargets: StaticSideEffectsWarningTargets = .all,
             defaultConfiguration: String? = nil,
@@ -131,6 +137,7 @@ extension Tuist {
             self.init(
                 resolveDependenciesWithSystemScm: resolveDependenciesWithSystemScm,
                 disablePackageVersionLocking: disablePackageVersionLocking,
+                skipPackageResolution: skipPackageResolution,
                 clonedSourcePackagesDirPath: clonedSourcePackagesDirPath,
                 additionalPackageResolutionArguments: [],
                 staticSideEffectsWarningTargets: staticSideEffectsWarningTargets,
@@ -153,6 +160,7 @@ extension Tuist {
         public static func options(
             resolveDependenciesWithSystemScm: Bool = false,
             disablePackageVersionLocking: Bool = false,
+            skipPackageResolution: Bool = false,
             clonedSourcePackagesDirPath: Path? = nil,
             staticSideEffectsWarningTargets: StaticSideEffectsWarningTargets = .all,
             enforceExplicitDependencies: Bool,
@@ -162,6 +170,7 @@ extension Tuist {
             self.init(
                 resolveDependenciesWithSystemScm: resolveDependenciesWithSystemScm,
                 disablePackageVersionLocking: disablePackageVersionLocking,
+                skipPackageResolution: skipPackageResolution,
                 clonedSourcePackagesDirPath: clonedSourcePackagesDirPath,
                 additionalPackageResolutionArguments: [],
                 staticSideEffectsWarningTargets: staticSideEffectsWarningTargets,

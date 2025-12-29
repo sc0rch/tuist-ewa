@@ -8,6 +8,7 @@ final class ConfigTests: XCTestCase {
             generationOptions: .options(
                 resolveDependenciesWithSystemScm: true,
                 disablePackageVersionLocking: false,
+                skipPackageResolution: true,
                 clonedSourcePackagesDirPath: .relativeToRoot("CustomSourcePackages"),
                 staticSideEffectsWarningTargets: .excluding(["Target1", "Target2"]),
                 defaultConfiguration: "Release",

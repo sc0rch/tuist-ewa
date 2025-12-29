@@ -105,6 +105,7 @@ struct TuistGeneratedProjectOptionsTests {
             let originalOptions = TuistGeneratedProjectOptions.GenerationOptions(
                 resolveDependenciesWithSystemScm: true,
                 disablePackageVersionLocking: true,
+                skipPackageResolution: true,
                 clonedSourcePackagesDirPath: clonedSourcePackagesDirPath,
                 additionalPackageResolutionArguments: ["-verbose", "-configuration", "debug"],
                 staticSideEffectsWarningTargets: .excluding(["TestTarget"]),
@@ -123,6 +124,7 @@ struct TuistGeneratedProjectOptionsTests {
             // Then - all original properties should be preserved
             #expect(result.resolveDependenciesWithSystemScm == true)
             #expect(result.disablePackageVersionLocking == true)
+            #expect(result.skipPackageResolution == true)
             #expect(result.clonedSourcePackagesDirPath == clonedSourcePackagesDirPath)
             #expect(result.staticSideEffectsWarningTargets == .excluding(["TestTarget"]))
             #expect(result.enforceExplicitDependencies == true)

@@ -61,6 +61,10 @@ public class SwiftPackageManagerInteractor: SwiftPackageManagerInteracting {
         }
 
         let workspacePath = path.appending(component: workspaceName)
+        if configGeneratedProjectOptions.generationOptions.skipPackageResolution {
+            Logger.current.notice("Skipping package dependency resolution as configured")
+            return
+        }
         Logger.current.notice("Resolving package dependencies using xcodebuild")
         // -list parameter is a workaround to resolve package dependencies for given workspace without specifying scheme
         var arguments = ["xcodebuild", "-resolvePackageDependencies"]

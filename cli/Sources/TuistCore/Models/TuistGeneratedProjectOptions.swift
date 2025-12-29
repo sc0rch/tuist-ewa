@@ -42,6 +42,7 @@ public struct TuistGeneratedProjectOptions: Equatable, Hashable {
             generationOptions: .init(
                 resolveDependenciesWithSystemScm: false,
                 disablePackageVersionLocking: false,
+                skipPackageResolution: false,
                 staticSideEffectsWarningTargets: .all,
                 buildInsightsDisabled: true,
                 testInsightsDisabled: true,
@@ -66,6 +67,7 @@ extension TuistGeneratedProjectOptions {
         @available(*, deprecated, message: "Use `additionalPackageResolutionArguments` instead.")
         public let resolveDependenciesWithSystemScm: Bool
         public let disablePackageVersionLocking: Bool
+        public let skipPackageResolution: Bool
         @available(*, deprecated, message: "Use `additionalPackageResolutionArguments` instead.")
         public let clonedSourcePackagesDirPath: AbsolutePath?
         public var additionalPackageResolutionArguments: [String]
@@ -82,6 +84,7 @@ extension TuistGeneratedProjectOptions {
         public init(
             resolveDependenciesWithSystemScm: Bool,
             disablePackageVersionLocking: Bool,
+            skipPackageResolution: Bool = false,
             clonedSourcePackagesDirPath: AbsolutePath? = nil,
             additionalPackageResolutionArguments: [String] = [],
             staticSideEffectsWarningTargets: StaticSideEffectsWarningTargets = .all,
@@ -96,6 +99,7 @@ extension TuistGeneratedProjectOptions {
         ) {
             self.resolveDependenciesWithSystemScm = resolveDependenciesWithSystemScm
             self.disablePackageVersionLocking = disablePackageVersionLocking
+            self.skipPackageResolution = skipPackageResolution
             self.clonedSourcePackagesDirPath = clonedSourcePackagesDirPath
             self.additionalPackageResolutionArguments = additionalPackageResolutionArguments
             self.staticSideEffectsWarningTargets = staticSideEffectsWarningTargets
@@ -168,6 +172,7 @@ extension TuistGeneratedProjectOptions {
         public static func test(
             resolveDependenciesWithSystemScm: Bool = false,
             disablePackageVersionLocking: Bool = false,
+            skipPackageResolution: Bool = false,
             clonedSourcePackagesDirPath: AbsolutePath? = nil,
             additionalPackageResolutionArguments: [String] = [],
             staticSideEffectsWarningTargets: TuistGeneratedProjectOptions.GenerationOptions
@@ -184,6 +189,7 @@ extension TuistGeneratedProjectOptions {
             .init(
                 resolveDependenciesWithSystemScm: resolveDependenciesWithSystemScm,
                 disablePackageVersionLocking: disablePackageVersionLocking,
+                skipPackageResolution: skipPackageResolution,
                 clonedSourcePackagesDirPath: clonedSourcePackagesDirPath,
                 additionalPackageResolutionArguments: additionalPackageResolutionArguments,
                 staticSideEffectsWarningTargets: staticSideEffectsWarningTargets,

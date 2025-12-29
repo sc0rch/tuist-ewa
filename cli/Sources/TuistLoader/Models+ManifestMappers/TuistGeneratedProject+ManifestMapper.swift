@@ -23,6 +23,7 @@ extension TuistCore.TuistGeneratedProjectOptions.GenerationOptions {
         return .init(
             resolveDependenciesWithSystemScm: manifest.resolveDependenciesWithSystemScm,
             disablePackageVersionLocking: manifest.disablePackageVersionLocking,
+            skipPackageResolution: manifest.skipPackageResolution,
             clonedSourcePackagesDirPath: clonedSourcePackagesDirPath,
             additionalPackageResolutionArguments: additionalPackageResolutionArguments,
             staticSideEffectsWarningTargets: TuistCore.TuistGeneratedProjectOptions.GenerationOptions
